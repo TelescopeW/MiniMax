@@ -1,0 +1,2 @@
+# MiniMax
+Minimax algorithm implementation
