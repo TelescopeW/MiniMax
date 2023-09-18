@@ -40,68 +40,54 @@ public class A_W_Player extends Player
      * this is the real king of the class, implemented minimax algorithm using 
      * recursion. 
      */
-    private int[] minimax(Board board, int playerSymbol, int alpha, int beta) {
-        int[] bestMove = new int[]{-1, -1, 0};
-        int bestScore = (playerSymbol == Board.X) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-    
-        int winner = board.getWinner();
-        if (winner == Board.X) {
-            return new int[]{0, 0, 10}; // The "X" player wins
-        } else if (winner == Board.O) {
-            return new int[]{0, 0, -10}; // The "O" player wins
-        } else if (board.boardFilled()) {
-            return new int[]{0, 0, 0}; // It's a draw
-        }
-    
-        List<int[]> possibleMoves = new ArrayList<>();
-    
-        for (int col = 0; col < board.getSize(); col++) {
-            for (int row = 0; row < board.getSize(); row++) {
-                if (board.isOpen(col, row)) {
-                    int[] move = new int[]{col, row, 0};
-                    Board possibleBoard = copyBoard(board);
-                    possibleBoard.fillPosition(col, row, playerSymbol);
-    
-                    int score;
-                    if (playerSymbol == Board.X) {
-                        score = minimax(possibleBoard, Board.O, alpha, beta)[2];
-                    } else {
-                        score = minimax(possibleBoard, Board.X, alpha, beta)[2];
-                    }
-    
-                    move[2] = score;
-                    possibleMoves.add(move);
-    
-                    if (playerSymbol == Board.X) {
-                        if (score > bestScore) {
-                            bestScore = score;
-                            bestMove = move;
-                        }
-                        alpha = Math.max(alpha, bestScore);
-                    } else {
-                        if (score < bestScore) {
-                            bestScore = score;
-                            bestMove = move;
-                        }
-                        beta = Math.min(beta, bestScore);
-                    }
-    
-                    if (beta <= alpha) {
-                        // Prune the remaining branches
-                        break;
-                    }
+private int[] minimax(Board board, int playerSymbol) {
+
+    int[] bestMove = new int[]{-1, -1, 0};
+    int bestScore = (playerSymbol == Board.X) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+
+    // Base case: Check for terminal states (win, lose, or draw)
+    int winner = board.getWinner();
+    if (winner == Board.X) {
+        return new int[]{0, 0, 10}; // The "X" player wins
+    } else if (winner == Board.O) {
+        return new int[]{0, 0, -10}; // The "O" player wins
+    } else if (board.boardFilled()) {
+        return new int[]{0, 0, 0}; // It's a draw
+    }
+
+
+    List<int[]> possibleMoves = new ArrayList<>(); //list of possible moves
+
+    // Generate all possible moves and evaluate them.
+    for (int col = 0; col < board.getSize(); col++) {
+        for (int row = 0; row < board.getSize(); row++) {
+            if (board.isOpen(col, row)) {
+                int[] move = new int[]{col, row, 0};
+                
+                Board possibleBoard = copyBoard(board);
+                possibleBoard.fillPosition(col, row, playerSymbol);
+                int score = minimax(possibleBoard, (playerSymbol == Board.X) ? Board.O : Board.X)[2];
+                //board.fillPosition(col, row, Board.BLANK); // Undo the move
+                
+                move[2] = score;
+                possibleMoves.add(move);
+
+                if (playerSymbol == Board.X && score > bestScore) {
+                    bestScore = score;
+                    bestMove = move;
+                } else if (playerSymbol == Board.O && score < bestScore) {
+                    bestScore = score;
+                    bestMove = move;
                 }
             }
         }
-        
-        if (playerSymbol == Board.X) {
-            return bestMove;
-        } else {
-            return new int[]{bestMove[0], bestMove[1], bestScore};
-        }
     }
-    
-
+    if (playerSymbol == Board.X) {
+        return bestMove;
+    } else {
+        return new int[]{bestMove[0], bestMove[1], -bestScore};
+    }
+}
 
 
 /**
